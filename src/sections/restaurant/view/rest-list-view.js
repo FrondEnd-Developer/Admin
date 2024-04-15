@@ -45,6 +45,7 @@ import {
 import UserTableRow from '../rest-table-row';
 import UserTableToolbar from '../rest-table-toolbar';
 import UserTableFiltersResult from '../rest-table-filters-result';
+import { result } from 'lodash';
 
 // ----------------------------------------------------------------------
 
@@ -116,21 +117,32 @@ export default function RestListView() {
     [table]
   );
 
+
   const handleResetFilters = useCallback(() => {
     setFilters(defaultFilters);
   }, []);
 
-  // ---------------------------------------------------
+
+
+
+  // ---------------------------------------------------------------------
 
   const handleDeleteRow = useCallback(
     async (id) => {
       const deleteRow = allRest.filter((row) => row._id !== id);
 
       try {
-        // const response = await restList();
-        const restaurantToDelete = allRest.find((restaurant) => restaurant._id === id);
-        const restid = restaurantToDelete._id;
-        const result = await deleteRestaurant(restid);
+        
+        // const restaurantToDelete = allRest.find((restaurant) => restaurant._id === id);
+        console.log("restraurant id:", id);
+        const token = sessionStorage.getItem('accessToken');
+        const data={"id":[id]};
+        console.log(token);
+        const result = await deleteRestaurant?.(data, {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        });
+
         if (result.status === 200) {
           if (childFunctionRef.current) {
             childFunctionRef.current('Restaurant removed', 'success');
@@ -138,9 +150,7 @@ export default function RestListView() {
         }
 
         enqueueSnackbar('Delete success!');
-
         setAllRest(deleteRow);
-
         table.onUpdatePageDeleteRow(dataInPage.length);
       } catch (error) {
         enqueueSnackbar('Failed to delete restaurant', { variant: 'error' });
@@ -153,8 +163,11 @@ export default function RestListView() {
     },
     [dataInPage.length, enqueueSnackbar, table, allRest, deleteRestaurant]
   );
+  // ----------------------------------------------------------------------
 
-  // ---------------------------------------
+
+
+
   const handleDeleteRows = useCallback(() => {
     const deleteRows = allRest.filter((row) => !table.selected.includes(row._id));
 

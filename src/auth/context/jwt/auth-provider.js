@@ -270,38 +270,18 @@ export function AuthProvider({ children }) {
 
   // ADD-REASTAURANT
 
-  const addRest = useCallback(async (name, location, restaurant_image, contactNumber) => {
+  const addRest = useCallback(async (name, location, restaurant_image, contactNumber, headers) => {
     try {
-      const ownerId = localStorage.getItem('user_id');
 
       const formData = new FormData();
       formData.append('name', name);
       formData.append('location', location);
       formData.append('restaurant_image', restaurant_image);
       formData.append('contactNumber', contactNumber);
-      formData.append('ownerId', ownerId);
 
       const response = await axios.post(endpoints.auth.addRest, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+        headers,
       });
-
-      const { accessToken } = response.data;
-
-      sessionStorage.setItem(STORAGE_KEY, accessToken);
-
-      // Dispatch Redux action if needed
-      // dispatch({
-      //   type: 'ADD-REST',
-      //   payload: {
-      //     user: {
-      //       ...user,
-      //       accessToken,
-      //     },
-      //   },
-      // });
-
       return response;
     } catch (error) {
       console.error('Error occurred while adding restaurant:', error);
@@ -315,8 +295,8 @@ export function AuthProvider({ children }) {
       const id = localStorage.getItem('user_id');
       const url = `${endpoints.auth.restList}/${id}`;
       const response = await axios.get(url);
-
       return response;
+
     } catch (error) {
       console.error('Error fetching data:', error);
       throw error;
@@ -324,18 +304,24 @@ export function AuthProvider({ children }) {
   }, []);
 
   // DELETE-RESTAURANT
-  const deleteRestaurant = useCallback(async (id) => {
-    try {
-      const ownerId = localStorage.getItem('user_id');
-      const url = `${endpoints.auth.deleteRestaurant}?id=${id}&ownerId=${ownerId}`;
-      const response = await axios.delete(url);
+  const deleteRestaurant = useCallback(async (data, headers) => {
+      // const data = {
+      //   "id": [
+      //     "helloo"
+      //   ]
+      // }
+      console.log("dataarray:", data);
+      console.log("delete-path:",endpoints.auth.deleteRestaurant);
+      const response = await axios.delete(endpoints.auth.deleteRestaurant, {
+        headers,
+        data
+      });
 
+      console.log("auth-provider:response", response);
       return response;
-    } catch (error) {
-      console.error('Error fetching data:', error);
-      throw error;
-    }
+   
   }, []);
+
   // ----------------------------------------------------------------------
 
   const checkAuthenticated = state.user ? 'authenticated' : 'unauthenticated';

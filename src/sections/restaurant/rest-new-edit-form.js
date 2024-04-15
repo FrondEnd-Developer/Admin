@@ -87,15 +87,17 @@ export default function UserNewEditForm({ currentUser }) {
 
   const values = watch();
 
+  const token = sessionStorage.getItem('accessToken');
+
   const onSubmit = handleSubmit(async (data) => {
     try {
       const { restaurant_image } = data;
-      const result = await addRest?.(
-        data.name,
-        data.location,
-        restaurant_image,
-        data.contactNumber
+      const result = await addRest?.(data.name, data.location, restaurant_image, data.contactNumber, {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${token}`,
+      },
       );
+      console.log("this is add-rest result:", result);
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       if (result.status === 200) {
